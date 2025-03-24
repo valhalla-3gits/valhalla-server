@@ -4,12 +4,14 @@ import {
   Model,
   DataType,
   ForeignKey,
-  BelongsTo, HasMany,
+  BelongsTo,
+  HasMany,
 } from 'sequelize-typescript';
 import { Rank } from './rank.entity';
 import { User } from './user.entity';
 import { Language } from './language.entity';
 import { SolvedTask } from './solvedTask.entity';
+import { NonAttribute } from 'sequelize';
 
 @Table
 export class Task extends Model<Task> {
@@ -76,5 +78,5 @@ export class Task extends Model<Task> {
   declare rank: Rank;
 
   @HasMany(() => SolvedTask)
-  declare solvedTasks: SolvedTask[];
+  declare solvedTasks?: NonAttribute<SolvedTask[]>;
 }

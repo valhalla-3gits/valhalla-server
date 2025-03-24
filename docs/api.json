@@ -56,6 +56,9 @@
     },
     {
       "name": "Tasks"
+    },
+    {
+      "name": "Admin"
     }
   ],
   "paths": {
@@ -146,7 +149,7 @@
     },
     "/users": {
       "get": {
-        "description": "",
+        "description": "Get current user by their JWT token",
         "security": [
           {
             "bearerAuth": []
@@ -166,7 +169,7 @@
         ]
       },
       "put": {
-        "description": "",
+        "description": "Update current user by their JWT token",
         "security": [
           {
             "bearerAuth": []
@@ -186,7 +189,7 @@
         ]
       },
       "delete": {
-        "description": "",
+        "description": "Delete (change status to deleted) current user by their JWT token",
         "security": [
           {
             "bearerAuth": []
@@ -208,7 +211,7 @@
     },
     "/users/{token}": {
       "get": {
-        "description": "",
+        "description": "Get user by their UUID token",
         "security": [
           {
             "bearerAuth": []
@@ -224,11 +227,12 @@
           }
         },
         "tags": [
-          "Users"
+          "Users",
+          "Admin"
         ]
       },
       "put": {
-        "description": "",
+        "description": "Update user by their UUID token",
         "security": [
           {
             "bearerAuth": []
@@ -244,11 +248,12 @@
           }
         },
         "tags": [
-          "Users"
+          "Users",
+          "Admin"
         ]
       },
       "delete": {
-        "description": "",
+        "description": "Delete user by their UUID token",
         "security": [
           {
             "bearerAuth": []
@@ -264,7 +269,8 @@
           }
         },
         "tags": [
-          "Users"
+          "Users",
+          "Admin"
         ]
       }
     },

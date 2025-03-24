@@ -5,12 +5,15 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
-  HasMany, BelongsToMany,
+  HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { UserStatus } from './userStatus.entity';
 import { UserRole } from './userRole.entity';
 import { Rank } from './rank.entity';
 import { Task } from './task.entity';
+import { NonAttribute } from 'sequelize';
+import { FavouriteTask } from './favouriteTask.entity';
 
 @Table
 export class User extends Model<User> {
@@ -91,8 +94,8 @@ export class User extends Model<User> {
   declare rank: Rank;
 
   @HasMany(() => Task)
-  declare tasks: Task[];
+  declare tasks?: NonAttribute<Task[]>;
 
-  @BelongsToMany(() => Task, { through: 'FavouriteTasks' })
-  declare favouriteTasks: Task[];
+  @BelongsToMany(() => Task, () => FavouriteTask)
+  declare favouriteTasks?: NonAttribute<Task[]>;
 }

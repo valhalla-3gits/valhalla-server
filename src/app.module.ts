@@ -12,13 +12,23 @@ import { ranksProviders } from './persistent/providers/ranks.providers';
 import { solvedTasksProviders } from './persistent/providers/solvedTasks.providers';
 import { userRolesProviders } from './persistent/providers/userRoles.providers';
 import { userStatusesProviders } from './persistent/providers/userStatuses.providers';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { DatabaseModule } from './core/database/database.module';
 
 @Module({
-  imports: [],
+  imports: [
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWTKEY,
+      signOptions: { expiresIn: process.env.TOKEN_EXPIRATION },
+    }),
+    DatabaseModule,
+  ],
   controllers: [UsersController, AuthController, TasksController],
   providers: [
-    ...tasksProviders,
     ...usersProviders,
+    ...tasksProviders,
     ...languagesProviders,
     ...ranksProviders,
     ...solvedTasksProviders,

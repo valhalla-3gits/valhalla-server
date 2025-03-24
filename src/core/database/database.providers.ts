@@ -8,6 +8,7 @@ import { Rank } from '../models/entities/rank.entity';
 import { Language } from '../models/entities/language.entity';
 import { Task } from '../models/entities/task.entity';
 import { User } from '../models/entities/user.entity';
+import { FavouriteTask } from '../models/entities/favouriteTask.entity';
 
 export const databaseProviders = [
   {
@@ -31,6 +32,7 @@ export const databaseProviders = [
       sequelize.addModels([
         User,
         Task,
+        FavouriteTask,
         Language,
         Rank,
         SolvedTask,
