@@ -34,6 +34,12 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @Get('renew')
   async renewToken(@Req() req: AuthRequest) {
-    return await this.authService.renewToken(req.user.token);
+    const token = await this.authService.renewToken(req.user.token);
+
+    if (!token) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    return token;
   }
 }

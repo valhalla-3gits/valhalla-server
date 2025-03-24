@@ -54,7 +54,15 @@ export class AuthService {
   }
 
   public async renewToken(userToken: string) {
+    const user = await this.userService.findOneByToken(userToken);
 
+    if (!user) {
+      return null;
+    }
+
+    const token = await this.generateToken(user as UserDto);
+
+    return { token: token };
   }
 
   private async generateToken(user: UserDto) {

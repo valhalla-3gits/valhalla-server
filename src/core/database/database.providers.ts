@@ -39,7 +39,7 @@ export const databaseProviders = [
         UserRole,
         UserStatus,
       ]);
-      await sequelize.sync();
+      // await sequelize.sync();
       return sequelize;
     },
   },
