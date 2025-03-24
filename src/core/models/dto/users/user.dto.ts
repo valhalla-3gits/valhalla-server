@@ -1,22 +1,7 @@
 import { UserStatus } from '../../entities/userStatus.entity';
-import { UserRole } from '../../entities/userRole.entity';
 import { Rank } from '../../entities/rank.entity';
 import { Task } from '../../entities/task.entity';
-
-export enum UserStatusEnum {
-  ACTIVE = 0,
-  DELETED = 1,
-  DISABLED = 2,
-}
-
-export enum RanksEnum {
-  FIRST = 0,
-  SECOND = 1,
-  THIRD = 2,
-  FOURTH = 3,
-  FIFTH = 4,
-  SIXTH = 5,
-}
+import { UserRoleEnum } from '../../entities/user.entity';
 
 export class UserDto {
   readonly token: string;
@@ -33,9 +18,7 @@ export class UserDto {
 
   readonly status: UserStatus;
 
-  readonly roleId: number;
-
-  readonly role: UserRole;
+  readonly role: UserRoleEnum;
 
   readonly rankId: number;
 

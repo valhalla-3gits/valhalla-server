@@ -5,5 +5,5 @@ module.exports = {
   config: path.resolve('src/persistent', 'config.ts'),
   'migrations-path': path.resolve('src/persistent', 'migrations'),
   'seeders-path': path.resolve('src/persistent', 'seeders'),
-  'models-path': path.resolve('src/persistent', 'models'),
+  'models-path': path.resolve('src/core/models', 'entities'),
 };

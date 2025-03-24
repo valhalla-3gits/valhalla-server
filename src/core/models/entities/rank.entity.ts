@@ -1,5 +1,14 @@
 import { Column, DataType, Model, Table } from 'sequelize-typescript';
 
+export enum RanksEnum {
+  FIRST = 0,
+  SECOND = 1,
+  THIRD = 2,
+  FOURTH = 3,
+  FIFTH = 4,
+  SIXTH = 5,
+}
+
 @Table
 export class Rank extends Model<Rank> {
   @Column({

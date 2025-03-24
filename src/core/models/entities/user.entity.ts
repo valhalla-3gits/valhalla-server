@@ -9,11 +9,15 @@ import {
   BelongsToMany,
 } from 'sequelize-typescript';
 import { UserStatus } from './userStatus.entity';
-import { UserRole } from './userRole.entity';
 import { Rank } from './rank.entity';
 import { Task } from './task.entity';
 import { NonAttribute } from 'sequelize';
 import { FavouriteTask } from './favouriteTask.entity';
+
+export enum UserRoleEnum {
+  USER = 0,
+  ADMIN = 1,
+}
 
 @Table
 export class User extends Model<User> {
@@ -67,26 +71,25 @@ export class User extends Model<User> {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    defaultValue: 0,
   })
   declare statusId: number;
 
   @BelongsTo(() => UserStatus)
   declare status: UserStatus;
 
-  @ForeignKey(() => UserRole)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    defaultValue: 0,
   })
-  declare roleId: number;
-
-  @BelongsTo(() => UserRole)
-  declare role: UserRole;
+  declare role: UserRoleEnum;
 
   @ForeignKey(() => Rank)
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
+    defaultValue: 0,
   })
   declare rankId: number;
 

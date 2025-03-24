@@ -1,18 +1,18 @@
-import { UserDto } from './user.dto';
 import { Request as HttpRequest } from 'express';
+import { User, UserRoleEnum } from '../../entities/user.entity';
 
 export class UserPayloadDto {
-  constructor(user: UserDto) {
+  constructor(user: User) {
     this.token = user.token;
     this.username = user.username;
-    this.role = user.role.name;
     this.status = user.status.name;
+    this.role = user.role;
   }
 
   readonly token: string;
   readonly username: string;
-  readonly role: string;
   readonly status: string;
+  readonly role: UserRoleEnum;
 }
 
 export type AuthRequest = HttpRequest & { user: UserPayloadDto };

@@ -1,5 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unused-vars,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-return */
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -15,11 +18,15 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<UserDto | null> {
+  async validateUser(username: string, pass: string): Promise<User | null> {
     const user: User | null =
       await this.userService.findOneByUsername(username);
     if (!user) {
       return null;
+    }
+
+    if (user.statusId == 1) {
+      throw new NotFoundException('User not found');
     }
 
     const match = await this.comparePassword(pass, user.password);
@@ -27,11 +34,11 @@ export class AuthService {
       return null;
     }
 
-    const { password, ...result } = user['dataValues'];
-    return result as UserDto;
+    // const { password, ...result } = user['dataValues'];
+    return user;
   }
 
-  public async login(user: UserDto) {
+  public async login(user: UserPayloadDto) {
     const token = await this.generateToken(user);
     return { user, token };
   }
@@ -39,6 +46,11 @@ export class AuthService {
   public async create(
     user: UserCreateDto,
   ): Promise<{ user: UserDto; token: string }> {
+    const userExist = await this.userService.findOneByUsername(user.username);
+    if (userExist) {
+      throw new ForbiddenException('This username already exist');
+    }
+
     const pass: string = await this.hashPassword(user.password);
 
     const newUser: User = await this.userService.create({
@@ -46,9 +58,13 @@ export class AuthService {
       password: pass,
     });
 
-    const { password, ...result } = newUser['dataValues'];
+    await newUser.reload();
 
-    const token = await this.generateToken(result as UserDto);
+    const userPayload = new UserPayloadDto(newUser);
+    const token = await this.generateToken(userPayload);
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = newUser['dataValues'];
 
     return { user: result as UserDto, token };
   }
@@ -60,23 +76,23 @@ export class AuthService {
       return null;
     }
 
-    const token = await this.generateToken(user as UserDto);
+    const userPayload = new UserPayloadDto(user);
+    const token = await this.generateToken(userPayload);
 
     return { token: token };
   }
 
-  private async generateToken(user: UserDto) {
-    const payload = new UserPayloadDto(user);
-    const token = await this.jwtService.signAsync(payload);
+  private async generateToken(user: UserPayloadDto) {
+    const token = await this.jwtService.signAsync({ ...user });
     return token;
   }
 
-  private async hashPassword(password) {
+  private async hashPassword(password: string) {
     const hash = await bcrypt.hash(password, 10);
     return hash;
   }
 
-  private async comparePassword(enteredPassword, dbPassword) {
+  private async comparePassword(enteredPassword: string, dbPassword: string) {
     const match = await bcrypt.compare(enteredPassword, dbPassword);
     return match;
   }

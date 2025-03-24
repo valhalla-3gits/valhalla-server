@@ -5,11 +5,8 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
-  BelongsToMany,
 } from 'sequelize-typescript';
-import { Rank } from './rank.entity';
 import { User } from './user.entity';
-import { Language } from './language.entity';
 import { Task } from './task.entity';
 
 @Table

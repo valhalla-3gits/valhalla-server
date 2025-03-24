@@ -10,11 +10,12 @@ import { AuthService } from './business-logic/services/auth/auth.service';
 import { languagesProviders } from './persistent/providers/languages.providers';
 import { ranksProviders } from './persistent/providers/ranks.providers';
 import { solvedTasksProviders } from './persistent/providers/solvedTasks.providers';
-import { userRolesProviders } from './persistent/providers/userRoles.providers';
 import { userStatusesProviders } from './persistent/providers/userStatuses.providers';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { DatabaseModule } from './core/database/database.module';
+import { LocalStrategy } from './core/securityStrategies/local.strategy';
+import { JwtStrategy } from './core/securityStrategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -32,11 +33,16 @@ import { DatabaseModule } from './core/database/database.module';
     ...languagesProviders,
     ...ranksProviders,
     ...solvedTasksProviders,
-    ...userRolesProviders,
     ...userStatusesProviders,
     UsersService,
     TasksService,
     AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: RolesGuard,
+    // },
   ],
 })
 export class AppModule {}
