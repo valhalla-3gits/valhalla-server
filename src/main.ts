@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,7 +16,17 @@ async function bootstrap() {
     // .addTag('')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('openapi', app, documentFactory);
+  // SwaggerModule.setup('openapi', app, documentFactory);
+  // const OpenApiSpecification =
+  /* … */
+
+  app.use(
+    '/reference',
+    apiReference({
+      content: documentFactory,
+    }),
+  );
+
   await app.listen(3000);
 }
 
