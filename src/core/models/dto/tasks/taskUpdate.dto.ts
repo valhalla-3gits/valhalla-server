@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { TestCreateDto } from '../tests/testCreate.dto';
+import { TestUpdateDto } from '../tests/testUpdate.dto';
 
 export class TaskUpdateDto {
   @IsNotEmpty()
@@ -9,7 +9,7 @@ export class TaskUpdateDto {
   readonly rank_uuid: string;
 
   @IsNotEmpty()
-  readonly tests: TestCreateDto[];
+  readonly tests: TestUpdateDto[];
 
   @IsNotEmpty()
   readonly description: string;

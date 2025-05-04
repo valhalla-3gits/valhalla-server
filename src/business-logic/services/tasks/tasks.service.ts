@@ -150,16 +150,23 @@ export class TasksService {
       languageId: language.id,
     });
 
-    // Delete existing tests and create new ones
-    if (task.tests) {
-      for (const test of task.tests) {
-        await this.testsService.deleteTest(test.id);
-      }
+    // Keep track of existing test tokens and which ones are updated
+    const updatedTestTokens = updateModel.tests
+      .filter((test) => test.token)
+      .map((test) => test.token);
+
+    // Update or create tests
+    for (const test of updateModel.tests) {
+      await this.testsService.updateTest(task.id, test);
     }
 
-    // Create new tests
-    for (const test of updateModel.tests) {
-      await this.testsService.createTest(task.id, test);
+    // Delete tests that are no longer in the update model
+    if (task.tests) {
+      for (const test of task.tests) {
+        if (!updatedTestTokens.includes(test.token)) {
+          await this.testsService.deleteTest(test.id);
+        }
+      }
     }
 
     // Fetch the updated task with all relations
