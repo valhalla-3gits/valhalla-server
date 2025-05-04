@@ -12,6 +12,7 @@ import { User } from './user.entity';
 import { Language } from './language.entity';
 import { SolvedTask } from './solvedTask.entity';
 import { NonAttribute } from 'sequelize';
+import { Test } from './tests.entity';
 
 @Table
 export class Task extends Model<Task> {
@@ -45,7 +46,10 @@ export class Task extends Model<Task> {
     type: DataType.TEXT,
     allowNull: false,
   })
-  declare tests: string;
+  declare prototype: string;
+
+  @HasMany(() => Test)
+  declare tests?: NonAttribute<Test[]>;
 
   @ForeignKey(() => User)
   @Column({

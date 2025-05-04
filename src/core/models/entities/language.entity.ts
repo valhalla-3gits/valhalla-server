@@ -10,11 +10,11 @@ export class Language extends Model<Language> {
   })
   declare id: number;
 
-  // @Column({
-  //   type: DataType.UUID,
-  //   allowNull: false,
-  // })
-  // declare token: string;
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
+  declare token: string;
 
   @Column({
     type: DataType.STRING(32),

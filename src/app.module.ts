@@ -16,6 +16,10 @@ import { PassportModule } from '@nestjs/passport';
 import { DatabaseModule } from './core/database/database.module';
 import { LocalStrategy } from './core/securityStrategies/local.strategy';
 import { JwtStrategy } from './core/securityStrategies/jwt.strategy';
+import { RanksController } from './api/controllers/ranks/ranks.controller';
+import { RanksService } from './business-logic/services/ranks/ranks.service';
+import { LanguagesService } from './business-logic/services/languages/languages.service';
+import { TestsService } from './business-logic/services/tests/tests.service';
 
 @Module({
   imports: [
@@ -26,7 +30,7 @@ import { JwtStrategy } from './core/securityStrategies/jwt.strategy';
     }),
     DatabaseModule,
   ],
-  controllers: [UsersController, AuthController, TasksController],
+  controllers: [UsersController, AuthController, TasksController, RanksController],
   providers: [
     ...usersProviders,
     ...tasksProviders,
@@ -39,6 +43,9 @@ import { JwtStrategy } from './core/securityStrategies/jwt.strategy';
     AuthService,
     LocalStrategy,
     JwtStrategy,
+    RanksService,
+    LanguagesService,
+    TestsService,
     // {
     //   provide: APP_GUARD,
     //   useClass: RolesGuard,
