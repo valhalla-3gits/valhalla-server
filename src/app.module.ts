@@ -20,6 +20,7 @@ import { RanksController } from './api/controllers/ranks/ranks.controller';
 import { RanksService } from './business-logic/services/ranks/ranks.service';
 import { LanguagesService } from './business-logic/services/languages/languages.service';
 import { TestsService } from './business-logic/services/tests/tests.service';
+import { RceEngineService } from './business-logic/services/rce-engine/rce-engine.service';
 
 @Module({
   imports: [
@@ -30,7 +31,12 @@ import { TestsService } from './business-logic/services/tests/tests.service';
     }),
     DatabaseModule,
   ],
-  controllers: [UsersController, AuthController, TasksController, RanksController],
+  controllers: [
+    UsersController,
+    AuthController,
+    TasksController,
+    RanksController,
+  ],
   providers: [
     ...usersProviders,
     ...tasksProviders,
@@ -46,6 +52,7 @@ import { TestsService } from './business-logic/services/tests/tests.service';
     RanksService,
     LanguagesService,
     TestsService,
+    RceEngineService,
     // {
     //   provide: APP_GUARD,
     //   useClass: RolesGuard,

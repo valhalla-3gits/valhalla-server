@@ -9,6 +9,7 @@ import { Task } from '../models/entities/task.entity';
 import { User } from '../models/entities/user.entity';
 import { FavouriteTask } from '../models/entities/favouriteTask.entity';
 import { IDatabaseConfigAttributes } from './interfaces/dbConfig.interface';
+import { Test } from '../models/entities/tests.entity';
 
 export const databaseProviders = [
   {
@@ -37,6 +38,7 @@ export const databaseProviders = [
         Rank,
         SolvedTask,
         UserStatus,
+        Test,
       ]);
       await sequelize.sync();
       return sequelize;

@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from '../../../business-logic/services/tasks/tasks.service';
-import { Task } from '../../../core/models/entities/task.entity';
 import { SearchQuery } from '../../../core/models/queries/searchQuery';
 import { TaskCreateDto } from '../../../core/models/dto/tasks/taskCreate.dto';
 import { AuthRequest } from '../../../core/models/dto/users/userPayload.dto';
@@ -22,6 +21,8 @@ import { UsersService } from '../../../business-logic/services/users/users.servi
 import { TaskDto } from '../../../core/models/dto/tasks/task.dto';
 import { TaskUpdateDto } from '../../../core/models/dto/tasks/taskUpdate.dto';
 import { TestDto } from '../../../core/models/dto/tests/test.dto';
+import { TaskAnswerDto } from '../../../core/models/dto/tasks/taskAnswer.dto';
+import { TestResultDto } from '../../../core/models/dto/tests/testResult.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -119,8 +120,20 @@ export class TasksController {
   @Post(':token')
   async testTaskSolution(
     @Param('token', ParseUUIDPipe) token: string,
-  ): Promise<void> {
-    // TODO: Implement testing task solution
+    @Body() answer: TaskAnswerDto,
+    @Req() req: AuthRequest,
+  ): Promise<TestResultDto[]> {
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
+    const test_results: TestResultDto[] = await this.tasksService.testTask(
+      token,
+      answer,
+    );
+
+    return test_results;
   }
 
   @UseGuards(AuthGuard('jwt'))

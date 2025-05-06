@@ -4,11 +4,16 @@ import { Test } from '../../../core/models/entities/tests.entity';
 import { TestCreateDto } from '../../../core/models/dto/tests/testCreate.dto';
 import { TestUpdateDto } from '../../../core/models/dto/tests/testUpdate.dto';
 import { v4 } from 'uuid';
+import { TestResponseDto } from '../../../core/models/dto/tests/testResponse.dto';
+import { TaskAnswerDto } from '../../../core/models/dto/tasks/taskAnswer.dto';
+import { RceEngineService } from '../rce-engine/rce-engine.service';
+import { Language } from '../../../core/models/entities/language.entity';
 
 @Injectable()
 export class TestsService {
   constructor(
     @Inject(TESTS_REPOSITORY) private readonly testsRepository: typeof Test,
+    private readonly rceEngineService: RceEngineService,
   ) {}
 
   async createTest(task_id: number, test_create_model: TestCreateDto) {
@@ -74,5 +79,18 @@ export class TestsService {
     );
 
     return test;
+  }
+
+  async executeTest(
+    answer: TaskAnswerDto,
+    test: Test,
+    language: Language,
+  ): Promise<TestResponseDto> {
+    const code = test.test_header + '\n' + answer.answer + '\n' + test.test;
+    const output: TestResponseDto = await this.rceEngineService.run(
+      language.token,
+      code,
+    );
+    return output;
   }
 }

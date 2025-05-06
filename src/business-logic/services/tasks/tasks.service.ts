@@ -16,6 +16,10 @@ import { TestsService } from '../tests/tests.service';
 import { Test } from '@nestjs/testing';
 import { TaskDto } from '../../../core/models/dto/tasks/task.dto';
 import { TaskUpdateDto } from '../../../core/models/dto/tasks/taskUpdate.dto';
+import { TaskAnswerDto } from '../../../core/models/dto/tasks/taskAnswer.dto';
+import { RceEngineResponse } from '../../../core/models/payloads/rceEngine.response.interface';
+import { TestResponseDto } from '../../../core/models/dto/tests/testResponse.dto';
+import { TestResultDto } from 'src/core/models/dto/tests/testResult.dto';
 
 @Injectable()
 export class TasksService {
@@ -212,5 +216,43 @@ export class TasksService {
 
     // Delete the task
     await task.destroy();
+  }
+
+  async testTask(token: string, answer: TaskAnswerDto): Promise<TestResultDto[]> {
+    const task = await this.tasksRepository.findOne({
+      where: {
+        token: token,
+      },
+      include: {
+        all: true,
+      },
+    });
+
+    if (!task) {
+      throw new NotFoundException('Task not found by the token.');
+    }
+
+    if (!task.tests) {
+      throw new NotFoundException('Task does not has tests');
+    }
+
+    const test_outputs: TestResultDto[] = await Promise.all(
+      task.tests.map(async (test) => {
+        const response = await this.testsService.executeTest(
+          answer,
+          test,
+          task.language,
+        );
+
+        const result: TestResultDto = {
+          output: response.stdout,
+          is_success: test.test_result == response.stdout,
+        };
+
+        return result;
+      }),
+    );
+
+    return test_outputs;
   }
 }
