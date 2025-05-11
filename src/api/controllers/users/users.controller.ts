@@ -19,6 +19,7 @@ import { RolesGuard } from '../../../core/guards/roles/role.guard';
 import { User, UserRoleEnum } from '../../../core/models/entities/user.entity';
 import { UserCreateDto } from '../../../core/models/dto/users/userCreate.dto';
 import { UserDto } from '../../../core/models/dto/users/user.dto';
+import { UserUpdateDto } from '../../../core/models/dto/users/userUpdate.dto';
 
 @Controller('users')
 export class UsersController {
@@ -89,7 +90,7 @@ export class UsersController {
   @Put(':token')
   async updateUser(
     @Param('token', ParseUUIDPipe) token: string,
-    @Body() userUpdate: UserDto,
+    @Body() userUpdate: UserUpdateDto,
   ): Promise<User> {
     const user: User | null = await this.usersService.findOneByToken(token);
     if (!user) {

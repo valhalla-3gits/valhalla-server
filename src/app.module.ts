@@ -11,6 +11,8 @@ import { languagesProviders } from './persistent/providers/languages.providers';
 import { ranksProviders } from './persistent/providers/ranks.providers';
 import { solvedTasksProviders } from './persistent/providers/solvedTasks.providers';
 import { userStatusesProviders } from './persistent/providers/userStatuses.providers';
+import { favouriteTasksProviders } from './persistent/providers/favouriteTasks.providers';
+import { testsProviders } from './persistent/providers/tests.providers';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { DatabaseModule } from './core/database/database.module';
@@ -44,6 +46,8 @@ import { RceEngineService } from './business-logic/services/rce-engine/rce-engin
     ...ranksProviders,
     ...solvedTasksProviders,
     ...userStatusesProviders,
+    ...favouriteTasksProviders,
+    ...testsProviders,
     UsersService,
     TasksService,
     AuthService,

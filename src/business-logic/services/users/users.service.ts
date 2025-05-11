@@ -1,14 +1,18 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { User } from '../../../core/models/entities/user.entity';
-import { USER_REPOSITORY } from '../../../core/constants';
+import { RANKS_REPOSITORY, USER_REPOSITORY } from '../../../core/constants';
 import { UserCreateDto } from '../../../core/models/dto/users/userCreate.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { UserDto } from '../../../core/models/dto/users/user.dto';
+import { UserUpdateDto } from '../../../core/models/dto/users/userUpdate.dto';
+import { Rank } from '../../../core/models/entities/rank.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class UsersService {
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: typeof User,
+    @Inject(RANKS_REPOSITORY) private readonly ranksRepository: typeof Rank,
   ) {}
 
   async create(userCreateDto: UserCreateDto): Promise<User> {
@@ -38,9 +42,12 @@ export class UsersService {
     );
   }
 
-  async updateFull(token: string, userDto: UserDto): Promise<void> {
+  async updateFull(token: string, userDto: UserUpdateDto): Promise<void> {
     await this.userRepository.update<User>(
-      { ...userDto },
+      {
+        firstname: userDto.firstname,
+        lastname: userDto.lastname,
+      } as User,
       {
         where: {
           token: token,
@@ -79,5 +86,21 @@ export class UsersService {
       where: { id },
       include: { all: true },
     });
+  }
+
+  async promoteRank(user: User) {
+    const ranks = await this.ranksRepository.findAll({
+      where: {
+        number: {
+          [Op.gt]: user.rank.number,
+        },
+      },
+    });
+    const sorted_rank = ranks.sort((a, b) => a.value - b.value);
+
+    const new_rank = sorted_rank[0];
+
+    user.rankId = new_rank.id;
+    await user.save();
   }
 }

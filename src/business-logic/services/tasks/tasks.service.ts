@@ -4,7 +4,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { TASKS_REPOSITORY } from '../../../core/constants';
+import {
+  FAVOURITE_TASKS_REPOSITORY,
+  SOLVED_TASKS_REPOSITORY,
+  TASKS_REPOSITORY,
+} from '../../../core/constants';
 import { Task } from '../../../core/models/entities/task.entity';
 import { SearchQuery } from '../../../core/models/queries/searchQuery';
 import { TaskSearchExtension } from '../../../core/utils/taskSearchExtension';
@@ -17,17 +21,24 @@ import { Test } from '@nestjs/testing';
 import { TaskDto } from '../../../core/models/dto/tasks/task.dto';
 import { TaskUpdateDto } from '../../../core/models/dto/tasks/taskUpdate.dto';
 import { TaskAnswerDto } from '../../../core/models/dto/tasks/taskAnswer.dto';
-import { RceEngineResponse } from '../../../core/models/payloads/rceEngine.response.interface';
-import { TestResponseDto } from '../../../core/models/dto/tests/testResponse.dto';
 import { TestResultDto } from 'src/core/models/dto/tests/testResult.dto';
+import { SolvedTask } from '../../../core/models/entities/solvedTask.entity';
+import { FavouriteTask } from '../../../core/models/entities/favouriteTask.entity';
+import { User } from 'src/core/models/entities/user.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class TasksService {
   constructor(
     @Inject(TASKS_REPOSITORY) private readonly tasksRepository: typeof Task,
+    @Inject(SOLVED_TASKS_REPOSITORY)
+    private readonly solvedTasksRepository: typeof SolvedTask,
+    @Inject(FAVOURITE_TASKS_REPOSITORY)
+    private readonly favouriteTasksRepository: typeof FavouriteTask,
     private readonly ranksService: RanksService,
     private readonly languagesService: LanguagesService,
     private readonly testsService: TestsService,
+    private readonly usersService: UsersService,
   ) {}
 
   async getTasks(): Promise<TaskDto[]> {
@@ -102,7 +113,7 @@ export class TasksService {
     return task_model;
   }
 
-  async getTaskByToken(token: string): Promise<TaskDto> {
+  async getTaskByToken(token: string): Promise<Task> {
     const task = await this.tasksRepository.findOne({
       where: {
         token: token,
@@ -116,9 +127,7 @@ export class TasksService {
       throw new NotFoundException('Task not found by the token.');
     }
 
-    const task_model: TaskDto = new TaskDto(task);
-
-    return task_model;
+    return task;
   }
 
   async updateTask(
@@ -218,7 +227,10 @@ export class TasksService {
     await task.destroy();
   }
 
-  async testTask(token: string, answer: TaskAnswerDto): Promise<TestResultDto[]> {
+  async testTask(
+    token: string,
+    answer: TaskAnswerDto,
+  ): Promise<TestResultDto[]> {
     const task = await this.tasksRepository.findOne({
       where: {
         token: token,
@@ -254,5 +266,46 @@ export class TasksService {
     );
 
     return test_outputs;
+  }
+
+  async solveTask(
+    token: string,
+    answer: TaskAnswerDto,
+    user: User,
+  ): Promise<SolvedTask> {
+    const task = await this.tasksRepository.findOne({
+      where: {
+        token: token,
+      },
+      include: {
+        all: true,
+      },
+    });
+
+    if (!task) {
+      throw new NotFoundException('Task not found by the token.');
+    }
+
+    const solvedTask = this.solvedTasksRepository.create(
+      {
+        token: uuidv4(),
+        solution: answer.answer,
+        userId: user.id,
+        taskId: task.id,
+      } as SolvedTask,
+      {
+        include: {
+          all: true,
+        },
+      },
+    );
+
+    user.experience += task.rank.value;
+
+    if (user.experience >= user.rank.targetValue) {
+      await this.usersService.promoteRank(user);
+    }
+
+    return solvedTask;
   }
 }

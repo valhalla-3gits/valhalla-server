@@ -100,5 +100,5 @@ export class User extends Model<User> {
   declare tasks?: NonAttribute<Task[]>;
 
   @BelongsToMany(() => Task, () => FavouriteTask)
-  declare favouriteTasks?: NonAttribute<Task[]>;
+  declare favouriteTasks?: Task[];
 }

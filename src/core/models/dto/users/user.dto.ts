@@ -1,9 +1,20 @@
 import { UserStatus } from '../../entities/userStatus.entity';
-import { Rank } from '../../entities/rank.entity';
-import { Task } from '../../entities/task.entity';
-import { UserRoleEnum } from '../../entities/user.entity';
+import { User, UserRoleEnum } from '../../entities/user.entity';
+import { TaskDto } from '../tasks/task.dto';
+import { RankDto } from '../ranks/rank.dto';
 
 export class UserDto {
+  constructor(user: User) {
+    this.token = user.token;
+    this.username = user.username;
+    this.firstname = user.firstname;
+    this.lastname = user.lastname;
+    this.experience = user.experience;
+    this.rank = new RankDto(user.rank);
+    this.tasks = user.tasks?.map((t) => new TaskDto(t)) ?? [];
+    this.favouriteTasks = user.favouriteTasks?.map((t) => new TaskDto(t)) ?? [];
+  }
+
   readonly token: string;
 
   readonly username: string;
@@ -14,17 +25,15 @@ export class UserDto {
 
   readonly experience: number;
 
-  readonly statusId: number;
+  // readonly statusId: number;
+  //
+  // readonly status: UserStatus;
 
-  readonly status: UserStatus;
+  // readonly role: UserRoleEnum;
 
-  readonly role: UserRoleEnum;
+  readonly rank: RankDto;
 
-  readonly rankId: number;
+  readonly tasks: TaskDto[];
 
-  readonly rank: Rank;
-
-  readonly tasks: Task[];
-
-  readonly favouriteTasks: Task[];
+  readonly favouriteTasks: TaskDto[];
 }

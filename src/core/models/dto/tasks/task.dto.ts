@@ -13,6 +13,7 @@ export class TaskDto {
     this.rank = new RankDto(task.rank);
     this.language = new LanguageDto(task.language);
     this.tests = task.tests?.map((test) => new TestDto(test)) ?? [];
+    this.is_favourite = false;
   }
 
   readonly token: string;
@@ -30,4 +31,6 @@ export class TaskDto {
   readonly language: LanguageDto;
 
   readonly rank: RankDto;
+
+  is_favourite: boolean;
 }

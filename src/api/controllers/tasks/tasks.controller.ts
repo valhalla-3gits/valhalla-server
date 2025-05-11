@@ -11,6 +11,7 @@ import {
   Body,
   Req,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from '../../../business-logic/services/tasks/tasks.service';
@@ -23,6 +24,8 @@ import { TaskUpdateDto } from '../../../core/models/dto/tasks/taskUpdate.dto';
 import { TestDto } from '../../../core/models/dto/tests/test.dto';
 import { TaskAnswerDto } from '../../../core/models/dto/tasks/taskAnswer.dto';
 import { TestResultDto } from '../../../core/models/dto/tests/testResult.dto';
+import { SolvedTaskDto } from '../../../core/models/dto/tasks/solvedTask.dto';
+import { Task } from '../../../core/models/entities/task.entity';
 
 @Controller('tasks')
 export class TasksController {
@@ -33,15 +36,50 @@ export class TasksController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  async getAllTasks(): Promise<TaskDto[]> {
+  async getAllTasks(@Req() req: AuthRequest): Promise<TaskDto[]> {
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
     const tasks: TaskDto[] = await this.tasksService.getTasks();
+
+    if (user.favouriteTasks !== undefined) {
+      tasks.forEach((task: TaskDto) => {
+        if (
+          user.favouriteTasks!.some((f_task) => f_task.token === task.token)
+        ) {
+          task.is_favourite = true;
+        }
+      });
+    }
+
     return tasks;
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  async searchTasks(@Query() query: SearchQuery): Promise<TaskDto[]> {
+  async searchTasks(
+    @Query() query: SearchQuery,
+    @Req() req: AuthRequest,
+  ): Promise<TaskDto[]> {
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
     const tasks: TaskDto[] = await this.tasksService.searchTasks(query);
+
+    if (user.favouriteTasks !== undefined) {
+      tasks.forEach((task: TaskDto) => {
+        if (
+          user.favouriteTasks!.some((f_task) => f_task.token === task.token)
+        ) {
+          task.is_favourite = true;
+        }
+      });
+    }
+
     return tasks;
   }
 
@@ -65,10 +103,26 @@ export class TasksController {
   @Get(':token')
   async getTask(
     @Param('token', ParseUUIDPipe) token: string,
+    @Req() req: AuthRequest,
   ): Promise<TaskDto> {
-    const task: TaskDto = await this.tasksService.getTaskByToken(token);
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
 
-    return task;
+    const task: Task = await this.tasksService.getTaskByToken(token);
+
+    const task_model = new TaskDto(task);
+
+    if (user.favouriteTasks !== undefined) {
+      if (
+        user.favouriteTasks.some((f_task) => f_task.token === task_model.token)
+      ) {
+        task_model.is_favourite = true;
+      }
+    }
+
+    return task_model;
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -76,9 +130,11 @@ export class TasksController {
   async getTests(
     @Param('token', ParseUUIDPipe) token: string,
   ): Promise<TestDto[]> {
-    const task: TaskDto = await this.tasksService.getTaskByToken(token);
+    const task: Task = await this.tasksService.getTaskByToken(token);
 
-    return task.tests;
+    const task_model = new TaskDto(task);
+
+    return task_model.tests;
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -96,6 +152,14 @@ export class TasksController {
 
     // Update the task
     const updatedTask = await this.tasksService.updateTask(token, updateModel);
+
+    if (user.favouriteTasks !== undefined) {
+      if (
+        user.favouriteTasks.some((f_task) => f_task.token === updatedTask.token)
+      ) {
+        updatedTask.is_favourite = true;
+      }
+    }
 
     return updatedTask;
   }
@@ -140,15 +204,50 @@ export class TasksController {
   @Post(':token/submit')
   async submitTaskSolution(
     @Param('token', ParseUUIDPipe) token: string,
-  ): Promise<void> {
-    // TODO: Implement submitting task solution
+    @Body() answer: TaskAnswerDto,
+    @Req() req: AuthRequest,
+  ): Promise<SolvedTaskDto> {
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
+    const test_results: TestResultDto[] = await this.tasksService.testTask(
+      token,
+      answer,
+    );
+
+    for (const test of test_results) {
+      if (!test.is_success) {
+        throw new BadRequestException('Task is not solved');
+      }
+    }
+
+    const solvedTask = await this.tasksService.solveTask(token, answer, user);
+
+    const solvedTaskDto = new SolvedTaskDto(solvedTask);
+
+    return solvedTaskDto;
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(':token/favourite')
   async addTaskToFavourites(
     @Param('token', ParseUUIDPipe) token: string,
+    @Req() req: AuthRequest,
   ): Promise<void> {
-    // TODO: Implement adding task to favourites
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
+    const task = await this.tasksService.getTaskByToken(token);
+
+    if (user.favouriteTasks === undefined) {
+      user.favouriteTasks = [];
+    }
+
+    user.favouriteTasks.push(task);
+    await user.save();
   }
 }

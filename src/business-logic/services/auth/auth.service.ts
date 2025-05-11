@@ -63,10 +63,10 @@ export class AuthService {
     const userPayload = new UserPayloadDto(newUser);
     const token = await this.generateToken(userPayload);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = newUser['dataValues'];
+    // Create a proper UserDto instance
+    const userDto = new UserDto(newUser);
 
-    return { user: result as UserDto, token };
+    return { user: userDto, token };
   }
 
   public async renewToken(userToken: string) {
