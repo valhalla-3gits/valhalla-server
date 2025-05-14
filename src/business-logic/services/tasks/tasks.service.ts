@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   FAVOURITE_TASKS_REPOSITORY,
@@ -49,13 +50,37 @@ export class TasksService {
   }
 
   async searchTasks(query: SearchQuery): Promise<TaskDto[]> {
-    const search_result = new TaskSearchExtension(
-      await this.tasksRepository.findAll(),
-      query,
-    )
-      .filter()
-      .search();
+    // Set default values if not provided
+    if (!query.search_string) {
+      query.search_string = '';
+    }
+    if (!query.rank_filter) {
+      query.rank_filter = [];
+    }
+    if (!query.language_filter) {
+      query.language_filter = [];
+    }
+    if (!query.page || query.page < 1) {
+      query.page = 1;
+    }
+    if (!query.limit || query.limit < 1) {
+      query.limit = 10;
+    }
 
+    // Get all tasks with their relationships
+    const allTasks = await this.tasksRepository.findAll({
+      include: {
+        all: true,
+      },
+    });
+
+    // Apply filtering, searching, and pagination
+    const search_result = new TaskSearchExtension(allTasks, query)
+      .filter()
+      .search()
+      .paginate();
+
+    // Convert to DTOs
     const tasks = search_result.db_result;
     const task_models = tasks.map((task) => new TaskDto(task));
 
@@ -80,6 +105,7 @@ export class TasksService {
         authorId: author_id,
         languageId: language.id,
         prototype: createModel.prototype,
+        examples: createModel.output_examples,
       } as Task,
       { include: { all: true } },
     );
@@ -99,6 +125,9 @@ export class TasksService {
     task = await this.tasksRepository.findOne({
       where: {
         id: task.id,
+      },
+      include: {
+        all: true,
       },
     });
 
@@ -161,7 +190,7 @@ export class TasksService {
       prototype: updateModel.prototype,
       rankId: rank.id,
       languageId: language.id,
-    });
+    } as Task);
 
     // Keep track of existing test tokens and which ones are updated
     const updatedTestTokens = updateModel.tests
@@ -201,7 +230,7 @@ export class TasksService {
     return new TaskDto(updatedTask);
   }
 
-  async deleteTask(token: string): Promise<void> {
+  async deleteTask(token: string, id: number): Promise<void> {
     // Find the task by token
     const task = await this.tasksRepository.findOne({
       where: {
@@ -214,6 +243,12 @@ export class TasksService {
 
     if (!task) {
       throw new NotFoundException('Task not found by the token.');
+    }
+
+    if (task.authorId !== id) {
+      throw new UnauthorizedException(
+        'Unable to delete task of the other user',
+      );
     }
 
     // Delete associated tests first

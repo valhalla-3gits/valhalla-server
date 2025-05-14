@@ -2,10 +2,12 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
+import { TokensService } from '../tokens/tokens.service';
 import { User } from '../../../core/models/entities/user.entity';
 import { UserDto } from '../../../core/models/dto/users/user.dto';
 import { UserPayloadDto } from '../../../core/models/dto/users/userPayload.dto';
@@ -16,6 +18,7 @@ export class AuthService {
   constructor(
     private readonly userService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly tokensService: TokensService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<User | null> {
@@ -39,13 +42,23 @@ export class AuthService {
   }
 
   public async login(user: UserPayloadDto) {
-    const token = await this.generateToken(user);
-    return { user, token };
+    const userEntity = await this.userService.findOneByUsername(user.username);
+    if (!userEntity) {
+      throw new NotFoundException('User not found');
+    }
+
+    const tokens = await this.tokensService.createTokens(userEntity);
+    return { 
+      user, 
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn
+    };
   }
 
   public async create(
     user: UserCreateDto,
-  ): Promise<{ user: UserDto; token: string }> {
+  ): Promise<{ user: UserDto; accessToken: string; refreshToken: string; expiresIn: number }> {
     const userExist = await this.userService.findOneByUsername(user.username);
     if (userExist) {
       throw new ForbiddenException('This username already exist');
@@ -60,32 +73,34 @@ export class AuthService {
 
     await newUser.reload();
 
-    const userPayload = new UserPayloadDto(newUser);
-    const token = await this.generateToken(userPayload);
+    // Create tokens
+    const tokens = await this.tokensService.createTokens(newUser);
 
     // Create a proper UserDto instance
     const userDto = new UserDto(newUser);
 
-    return { user: userDto, token };
+    return { 
+      user: userDto, 
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn
+    };
   }
 
-  public async renewToken(userToken: string) {
-    const user = await this.userService.findOneByToken(userToken);
+  public async renewToken(refreshToken: string) {
+    const tokens = await this.tokensService.refreshTokens(refreshToken);
 
-    if (!user) {
-      return null;
+    if (!tokens) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const userPayload = new UserPayloadDto(user);
-    const token = await this.generateToken(userPayload);
-
-    return { token: token };
+    return tokens;
   }
 
-  private async generateToken(user: UserPayloadDto) {
-    const token = await this.jwtService.signAsync({ ...user });
-    return token;
+  public async logout(refreshToken: string): Promise<boolean> {
+    return this.tokensService.revokeToken(refreshToken);
   }
+
 
   private async hashPassword(password: string) {
     const hash = await bcrypt.hash(password, 10);

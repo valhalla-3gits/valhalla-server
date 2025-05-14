@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -16,6 +15,7 @@ import {
   AuthRequest,
   UserPayloadDto,
 } from '../../../core/models/dto/users/userPayload.dto';
+import { UserDto } from '../../../core/models/dto/users/user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,26 +24,43 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @HttpCode(HttpStatus.OK)
   @Post()
-  async login(
-    @Req() req: AuthRequest,
-  ): Promise<{ user: UserPayloadDto; token: string }> {
+  async login(@Req() req: AuthRequest): Promise<{
+    user: UserPayloadDto;
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  }> {
     return await this.authService.login(req.user);
   }
 
   @Post('register')
-  async registerUser(@Body() user: UserCreateDto) {
+  async registerUser(@Body() user: UserCreateDto): Promise<{
+    user: UserDto;
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  }> {
     return await this.authService.create(user);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('renew')
-  async renewToken(@Req() req: AuthRequest) {
-    const token = await this.authService.renewToken(req.user.token);
-
-    if (!token) {
-      throw new UnauthorizedException('Invalid token');
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refreshToken(@Body() body: { refreshToken: string }) {
+    try {
+      return await this.authService.renewToken(body.refreshToken);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
+  }
 
-    return token;
+  @UseGuards(AuthGuard('jwt'))
+  @Post('logout')
+  @HttpCode(HttpStatus.OK)
+  async logout(@Body() body: { refreshToken: string }) {
+    const success = await this.authService.logout(body.refreshToken);
+    if (!success) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+    return { message: 'Logged out successfully' };
   }
 }

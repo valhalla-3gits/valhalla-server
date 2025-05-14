@@ -43,6 +43,12 @@ export class Test extends Model<Test> {
   })
   declare test_header: string;
 
+  @Column({
+    type: DataType.STRING(64),
+    allowNull: false,
+  })
+  declare test_result: string;
+
   @ForeignKey(() => Task)
   @Column({
     type: DataType.INTEGER,
@@ -50,12 +56,6 @@ export class Test extends Model<Test> {
     defaultValue: 0,
   })
   declare task_id: number;
-
-  @Column({
-    type: DataType.STRING(64),
-    allowNull: false,
-  })
-  declare test_result: string;
 
   @BelongsTo(() => Task)
   declare task: Task;

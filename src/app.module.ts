@@ -4,9 +4,11 @@ import { AuthController } from './api/controllers/auth/auth.controller';
 import { TasksController } from './api/controllers/tasks/tasks.controller';
 import { tasksProviders } from './persistent/providers/tasks.providers';
 import { usersProviders } from './persistent/providers/users.providers';
+import { tokensProviders } from './persistent/providers/tokens.providers';
 import { UsersService } from './business-logic/services/users/users.service';
 import { TasksService } from './business-logic/services/tasks/tasks.service';
 import { AuthService } from './business-logic/services/auth/auth.service';
+import { TokensService } from './business-logic/services/tokens/tokens.service';
 import { languagesProviders } from './persistent/providers/languages.providers';
 import { ranksProviders } from './persistent/providers/ranks.providers';
 import { solvedTasksProviders } from './persistent/providers/solvedTasks.providers';
@@ -28,8 +30,8 @@ import { RceEngineService } from './business-logic/services/rce-engine/rce-engin
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: process.env.JWTKEY,
-      signOptions: { expiresIn: process.env.TOKEN_EXPIRATION },
+      secret: process.env.JWTKEY || 'your-secret-key',
+      signOptions: { expiresIn: process.env.ACCESS_TOKEN_EXPIRATION || '15m' },
     }),
     DatabaseModule,
   ],
@@ -48,9 +50,11 @@ import { RceEngineService } from './business-logic/services/rce-engine/rce-engin
     ...userStatusesProviders,
     ...favouriteTasksProviders,
     ...testsProviders,
+    ...tokensProviders,
     UsersService,
     TasksService,
     AuthService,
+    TokensService,
     LocalStrategy,
     JwtStrategy,
     RanksService,

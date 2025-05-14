@@ -44,13 +44,13 @@ export class User extends Model<User> {
 
   @Column({
     type: DataType.STRING(64),
-    allowNull: false,
+    allowNull: true,
   })
   declare firstname: string;
 
   @Column({
     type: DataType.STRING(64),
-    allowNull: false,
+    allowNull: true,
   })
   declare lastname: string;
 

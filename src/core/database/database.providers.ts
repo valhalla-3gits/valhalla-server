@@ -10,6 +10,7 @@ import { User } from '../models/entities/user.entity';
 import { FavouriteTask } from '../models/entities/favouriteTask.entity';
 import { IDatabaseConfigAttributes } from './interfaces/dbConfig.interface';
 import { Test } from '../models/entities/tests.entity';
+import { Token } from '../models/entities/token.entity';
 
 export const databaseProviders = [
   {
@@ -39,8 +40,9 @@ export const databaseProviders = [
         SolvedTask,
         UserStatus,
         Test,
+        Token,
       ]);
-      await sequelize.sync();
+      // await sequelize.sync({ force: true });
       return sequelize;
     },
   },

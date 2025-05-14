@@ -26,21 +26,18 @@ export class Language extends Model<Language> {
   @Column({
     type: DataType.STRING(16),
     allowNull: false,
-    unique: true,
   })
   declare shortName: string;
 
   @Column({
     type: DataType.STRING(16),
     allowNull: false,
-    unique: true,
   })
   declare mainFile: string;
 
   @Column({
     type: DataType.STRING(32),
     allowNull: false,
-    unique: true,
   })
   declare image: string;
 }

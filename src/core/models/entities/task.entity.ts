@@ -11,7 +11,6 @@ import { Rank } from './rank.entity';
 import { User } from './user.entity';
 import { Language } from './language.entity';
 import { SolvedTask } from './solvedTask.entity';
-import { NonAttribute } from 'sequelize';
 import { Test } from './tests.entity';
 
 @Table
@@ -48,8 +47,11 @@ export class Task extends Model<Task> {
   })
   declare prototype: string;
 
-  @HasMany(() => Test)
-  declare tests?: NonAttribute<Test[]>;
+  @Column({
+    type: DataType.TEXT,
+    allowNull: false,
+  })
+  declare examples: string;
 
   @ForeignKey(() => User)
   @Column({
@@ -82,5 +84,8 @@ export class Task extends Model<Task> {
   declare rank: Rank;
 
   @HasMany(() => SolvedTask)
-  declare solvedTasks?: NonAttribute<SolvedTask[]>;
+  declare solvedTasks?: SolvedTask[];
+
+  @HasMany(() => Test)
+  declare tests?: Test[];
 }

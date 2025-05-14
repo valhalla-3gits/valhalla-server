@@ -34,29 +34,41 @@ export class TasksController {
     private readonly usersService: UsersService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
-  async getAllTasks(@Req() req: AuthRequest): Promise<TaskDto[]> {
-    const user = await this.usersService.findOneByToken(req.user.token);
-    if (!user) {
-      throw new NotFoundException('User does not exist');
-    }
+  // @UseGuards(AuthGuard('jwt'))
+  // @Get()
+  // async getAllTasks(@Req() req: AuthRequest): Promise<TaskDto[]> {
+  //   const user = await this.usersService.findOneByToken(req.user.token);
+  //   if (!user) {
+  //     throw new NotFoundException('User does not exist');
+  //   }
+  //
+  //   const tasks: TaskDto[] = await this.tasksService.getTasks();
+  //
+  //   if (user.favouriteTasks !== undefined) {
+  //     tasks.forEach((task: TaskDto) => {
+  //       if (
+  //         user.favouriteTasks!.some((f_task) => f_task.token === task.token)
+  //       ) {
+  //         task.is_favourite = true;
+  //       }
+  //     });
+  //   }
+  //
+  //   return tasks;
+  // }
 
-    const tasks: TaskDto[] = await this.tasksService.getTasks();
-
-    if (user.favouriteTasks !== undefined) {
-      tasks.forEach((task: TaskDto) => {
-        if (
-          user.favouriteTasks!.some((f_task) => f_task.token === task.token)
-        ) {
-          task.is_favourite = true;
-        }
-      });
-    }
-
-    return tasks;
-  }
-
+  /**
+   * Search for tasks with optional filtering, fuzzy search, and pagination
+   * 
+   * @param query SearchQuery object containing:
+   *   - search_string: String to search for in task names (fuzzy search)
+   *   - rank_filter: Array of rank tokens to filter by
+   *   - language_filter: Array of language tokens to filter by
+   *   - page: Page number (starts at 1)
+   *   - limit: Number of items per page
+   * @param req Request object containing user information
+   * @returns Array of TaskDto objects matching the search criteria
+   */
   @UseGuards(AuthGuard('jwt'))
   @Get()
   async searchTasks(
@@ -177,7 +189,7 @@ export class TasksController {
     }
 
     // Delete the task
-    await this.tasksService.deleteTask(token);
+    await this.tasksService.deleteTask(token, user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -243,11 +255,21 @@ export class TasksController {
 
     const task = await this.tasksService.getTaskByToken(token);
 
-    if (user.favouriteTasks === undefined) {
-      user.favouriteTasks = [];
+    // Check if the task is already in the favourite tasks list
+    const isFavourite = user.favouriteTasks?.some(
+      (f_task) => f_task.token === task.token,
+    );
+
+    // Toggle the favourite status of the task
+    if (isFavourite) {
+      user.favouriteTasks = user.favouriteTasks?.filter(
+        (f_task) => f_task.token !== task.token,
+      );
+    } else {
+      user.favouriteTasks?.push(task);
     }
 
-    user.favouriteTasks.push(task);
     await user.save();
   }
+
 }

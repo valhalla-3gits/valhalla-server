@@ -14,15 +14,15 @@ INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "crea
 VALUES (5, gen_random_uuid(), 'Sixth', 5, 1600, 64000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Statuses
-
+--
 INSERT INTO public."UserStatuses" (id, name, "createdAt", "updatedAt") VALUES (0, 'active', '2025-03-24 12:48:50.114000 +00:00', '2025-03-24 12:48:50.114000 +00:00');
 INSERT INTO public."UserStatuses" (id, name, "createdAt", "updatedAt") VALUES (1, 'deleted', '2025-03-24 12:48:50.114000 +00:00', '2025-03-24 12:48:50.114000 +00:00');
 
 -- Lanugages
 
-INSERT INTO public."Languages" (id, token, name, shortName, mainFile, image) VALUES (0, gen_random_uuid(), 'C', 'C', 'main.c', 'clang');
-INSERT INTO public."Languages" (id, token, name, shortName, mainFile, image) VALUES (1, gen_random_uuid(), 'Cpp', 'Cpp', 'main.cpp', 'clang');
-INSERT INTO public."Languages" (id, token, name, shortName, mainFile, image) VALUES (2, gen_random_uuid(), 'Python', 'Py', 'main.py', 'python');
-INSERT INTO public."Languages" (id, token, name, shortName, mainFile, image) VALUES (3, gen_random_uuid(), 'JavaScript', 'JS', 'main.js', 'javascript');
-INSERT INTO public."Languages" (id, token, name, shortName, mainFile, image) VALUES (4, gen_random_uuid(), 'TypeScript', 'TS', 'main.ts', 'typescript');
-INSERT INTO public."Languages" (id, token, name, shortName, mainFile, image) VALUES (5, gen_random_uuid(), 'Rust', 'Rs', 'main.rs', 'rust');
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (0, gen_random_uuid(), 'C', 'C', 'main.c', 'clang', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (1, gen_random_uuid(), 'Cpp', 'Cpp', 'main.cpp', 'clang', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (2, gen_random_uuid(), 'Python', 'Py', 'main.py', 'python', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (3, gen_random_uuid(), 'JavaScript', 'JS', 'main.js', 'javascript', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (4, gen_random_uuid(), 'TypeScript', 'TS', 'main.ts', 'typescript', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (5, gen_random_uuid(), 'Rust', 'Rs', 'main.rs', 'rust', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

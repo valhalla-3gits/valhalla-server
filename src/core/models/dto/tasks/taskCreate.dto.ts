@@ -15,11 +15,11 @@ export class TaskCreateDto {
   readonly description: string;
 
   @IsNotEmpty()
+  readonly prototype: string;
+
+  @IsNotEmpty()
   readonly output_examples: string;
 
   @IsNotEmpty()
   readonly language_uuid: string;
-
-  @IsNotEmpty()
-  readonly prototype: string;
 }
