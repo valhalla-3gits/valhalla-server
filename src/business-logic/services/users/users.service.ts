@@ -7,6 +7,7 @@ import { UserDto } from '../../../core/models/dto/users/user.dto';
 import { UserUpdateDto } from '../../../core/models/dto/users/userUpdate.dto';
 import { Rank } from '../../../core/models/entities/rank.entity';
 import { Op } from 'sequelize';
+import { UserStatsDto } from '../../../core/models/dto/users/UserStatsDto';
 
 @Injectable()
 export class UsersService {
@@ -102,5 +103,22 @@ export class UsersService {
 
     user.rankId = new_rank.id;
     await user.save();
+  }
+
+  async getStats(user: User): Promise<UserStatsDto> {
+    const nextRank = await this.ranksRepository.findOne({
+      where: {
+        number: user.rank.number + 1,
+      },
+    });
+
+    const userStats = {
+      tasksCompleted: user.solvedTasks?.length ?? 0,
+      currentXp: user.experience,
+      xpToNextRank: user.rank.targetValue - user.experience,
+      nextRank: nextRank?.name ?? 'N/A',
+    } as UserStatsDto;
+
+    return userStats;
   }
 }

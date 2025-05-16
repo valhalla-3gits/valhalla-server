@@ -9,8 +9,12 @@ export class LanguagesService {
     private readonly languagesRepository: typeof Language,
   ) {}
 
-  async getLanguages() {
-    // TODO
+  async getLanguages(): Promise<Language[] | null> {
+    let languages = await this.languagesRepository.findAll<Language>();
+    if (languages.length === 0) {
+      throw new NotFoundException('No languages found');
+    }
+    return languages;
   }
 
   async getLanguageByToken(token: string): Promise<Language> {

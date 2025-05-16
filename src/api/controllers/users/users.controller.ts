@@ -18,8 +18,8 @@ import { Roles } from '../../../core/guards/roles/role.decorator';
 import { RolesGuard } from '../../../core/guards/roles/role.guard';
 import { User, UserRoleEnum } from '../../../core/models/entities/user.entity';
 import { UserCreateDto } from '../../../core/models/dto/users/userCreate.dto';
-import { UserDto } from '../../../core/models/dto/users/user.dto';
 import { UserUpdateDto } from '../../../core/models/dto/users/userUpdate.dto';
+import { UserStatsDto } from '../../../core/models/dto/users/UserStatsDto';
 
 @Controller('users')
 export class UsersController {
@@ -37,6 +37,21 @@ export class UsersController {
 
     const userClientModel = new UserClientModel(user);
     return userClientModel;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('stats')
+  async getCurrentUserStats(@Req() req: AuthRequest): Promise<UserStatsDto> {
+    const user: User | null = await this.usersService.findOneByToken(
+      req.user.token,
+    );
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    const userStats = await this.usersService.getStats(user);
+
+    return userStats;
   }
 
   @UseGuards(AuthGuard('jwt'))

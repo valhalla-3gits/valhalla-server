@@ -162,9 +162,23 @@
         ]
       }
     },
-    "/auth/renew": {
-      "get": {
-        "operationId": "AuthController_renewToken",
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refreshToken",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
         "parameters": [],
         "responses": {
           "200": {
@@ -397,9 +411,9 @@
         ]
       }
     },
-    "/ranks": {
+    "/meta/ranks": {
       "get": {
-        "operationId": "RanksController_getRanks",
+        "operationId": "MetaController_getRanks",
         "parameters": [],
         "responses": {
           "200": {
@@ -407,7 +421,21 @@
           }
         },
         "tags": [
-          "Ranks"
+          "Meta"
+        ]
+      }
+    },
+    "/meta/languages": {
+      "get": {
+        "operationId": "MetaController_getLanguages",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Meta"
         ]
       }
     }
@@ -432,8 +460,8 @@
       "description": "Task management endpoints"
     },
     {
-      "name": "Ranks",
-      "description": "Rank management endpoints"
+      "name": "Meta",
+      "description": "Metadata endpoints including ranks and languages"
     }
   ],
   "servers": [],

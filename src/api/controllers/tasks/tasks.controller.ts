@@ -15,7 +15,11 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { TasksService } from '../../../business-logic/services/tasks/tasks.service';
-import { SearchQuery } from '../../../core/models/queries/searchQuery';
+import {
+  SearchQuery,
+  SearchType,
+} from '../../../core/models/queries/searchQuery';
+import { SearchResult } from '../../../core/utils/SearchExtension';
 import { TaskCreateDto } from '../../../core/models/dto/tasks/taskCreate.dto';
 import { AuthRequest } from '../../../core/models/dto/users/userPayload.dto';
 import { UsersService } from '../../../business-logic/services/users/users.service';
@@ -34,56 +38,72 @@ export class TasksController {
     private readonly usersService: UsersService,
   ) {}
 
-  // @UseGuards(AuthGuard('jwt'))
-  // @Get()
-  // async getAllTasks(@Req() req: AuthRequest): Promise<TaskDto[]> {
-  //   const user = await this.usersService.findOneByToken(req.user.token);
-  //   if (!user) {
-  //     throw new NotFoundException('User does not exist');
-  //   }
-  //
-  //   const tasks: TaskDto[] = await this.tasksService.getTasks();
-  //
-  //   if (user.favouriteTasks !== undefined) {
-  //     tasks.forEach((task: TaskDto) => {
-  //       if (
-  //         user.favouriteTasks!.some((f_task) => f_task.token === task.token)
-  //       ) {
-  //         task.is_favourite = true;
-  //       }
-  //     });
-  //   }
-  //
-  //   return tasks;
-  // }
-
   /**
-   * Search for tasks with optional filtering, fuzzy search, and pagination
-   * 
+   * Search for tasks with optional filtering, fuzzy search, sorting, and pagination
+   *
    * @param query SearchQuery object containing:
    *   - search_string: String to search for in task names (fuzzy search)
-   *   - rank_filter: Array of rank tokens to filter by
-   *   - language_filter: Array of language tokens to filter by
+   *   - rank_filter: ID of the rank to filter by
+   *   - language_filter: ID of the language to filter by
+   *   - search_type: Type of search ('all', 'favorites', 'solved')
+   *   - sort_by: Field to sort by ('createdAt' or 'name')
+   *   - sort_direction: Direction to sort ('asc' or 'desc')
    *   - page: Page number (starts at 1)
    *   - limit: Number of items per page
    * @param req Request object containing user information
-   * @returns Array of TaskDto objects matching the search criteria
    */
   @UseGuards(AuthGuard('jwt'))
   @Get()
   async searchTasks(
     @Query() query: SearchQuery,
     @Req() req: AuthRequest,
-  ): Promise<TaskDto[]> {
+  ): Promise<SearchResult<TaskDto>> {
     const user = await this.usersService.findOneByToken(req.user.token);
     if (!user) {
       throw new NotFoundException('User does not exist');
     }
 
-    const tasks: TaskDto[] = await this.tasksService.searchTasks(query);
+    // Handle different search types
+    let result: SearchResult<TaskDto>;
 
+    if (query.search_type === SearchType.FAVORITES) {
+      // Get all tasks and filter for favorites
+      const searchResult = await this.tasksService.searchTasks(query);
+
+      // Filter to only include favorite tasks
+      if (user.favouriteTasks && user.favouriteTasks.length > 0) {
+        const favoriteTokens = user.favouriteTasks.map((task) => task.token);
+        searchResult.items = searchResult.items.filter((task) =>
+          favoriteTokens.includes(task.token),
+        );
+      } else {
+        searchResult.items = [];
+      }
+
+      result = searchResult;
+    } else if (query.search_type === SearchType.SOLVED) {
+      // Get all tasks and filter for solved
+      const searchResult = await this.tasksService.searchTasks(query);
+
+      // Filter to only include solved tasks
+      if (user.solvedTasks && user.solvedTasks.length > 0) {
+        const solvedTokens = user.solvedTasks.map((task) => task.token);
+        searchResult.items = searchResult.items.filter((task) =>
+          solvedTokens.includes(task.token),
+        );
+      } else {
+        searchResult.items = [];
+      }
+
+      result = searchResult;
+    } else {
+      // Default search type (ALL)
+      result = await this.tasksService.searchTasks(query);
+    }
+
+    // Mark favorite tasks
     if (user.favouriteTasks !== undefined) {
-      tasks.forEach((task: TaskDto) => {
+      result.items.forEach((task: TaskDto) => {
         if (
           user.favouriteTasks!.some((f_task) => f_task.token === task.token)
         ) {
@@ -92,7 +112,7 @@ export class TasksController {
       });
     }
 
-    return tasks;
+    return result;
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -271,5 +291,4 @@ export class TasksController {
 
     await user.save();
   }
-
 }

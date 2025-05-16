@@ -6,6 +6,7 @@ import {
 } from '../../../core/models/entities/token.entity';
 import { User } from '../../../core/models/entities/user.entity';
 import { UserPayloadDto } from '../../../core/models/dto/users/userPayload.dto';
+import { UserStatus } from '../../../core/models/entities/userStatus.entity';
 
 @Injectable()
 export class TokensService {
@@ -151,7 +152,12 @@ export class TokensService {
         type: TokenTypeEnum.REFRESH,
         revoked: false,
       },
-      include: [{ model: User }],
+      include: [
+        {
+          model: User,
+          include: [{ model: UserStatus }],
+        },
+      ],
     });
 
     if (!tokenRecord || new Date() > tokenRecord.expiresAt) {

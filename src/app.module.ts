@@ -20,7 +20,7 @@ import { PassportModule } from '@nestjs/passport';
 import { DatabaseModule } from './core/database/database.module';
 import { LocalStrategy } from './core/securityStrategies/local.strategy';
 import { JwtStrategy } from './core/securityStrategies/jwt.strategy';
-import { RanksController } from './api/controllers/ranks/ranks.controller';
+import { MetaController } from './api/controllers/meta/meta.controller';
 import { RanksService } from './business-logic/services/ranks/ranks.service';
 import { LanguagesService } from './business-logic/services/languages/languages.service';
 import { TestsService } from './business-logic/services/tests/tests.service';
@@ -39,7 +39,7 @@ import { RceEngineService } from './business-logic/services/rce-engine/rce-engin
     UsersController,
     AuthController,
     TasksController,
-    RanksController,
+    MetaController,
   ],
   providers: [
     ...usersProviders,

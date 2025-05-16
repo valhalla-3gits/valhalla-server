@@ -13,6 +13,7 @@ import { Rank } from './rank.entity';
 import { Task } from './task.entity';
 import { NonAttribute } from 'sequelize';
 import { FavouriteTask } from './favouriteTask.entity';
+import { SolvedTask } from './solvedTask.entity';
 
 export enum UserRoleEnum {
   USER = 0,
@@ -101,4 +102,7 @@ export class User extends Model<User> {
 
   @BelongsToMany(() => Task, () => FavouriteTask)
   declare favouriteTasks?: Task[];
+
+  @HasMany(() => SolvedTask)
+  declare solvedTasks?: SolvedTask[];
 }

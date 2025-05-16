@@ -1,7 +1,7 @@
 import {
   ExtractJwt,
   Strategy,
-  StrategyOptionsWithoutRequest,
+  StrategyOptions, StrategyOptionsWithRequest,
 } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
@@ -9,6 +9,7 @@ import { UsersService } from '../../business-logic/services/users/users.service'
 import { TokensService } from '../../business-logic/services/tokens/tokens.service';
 import { UserPayloadDto } from '../models/dto/users/userPayload.dto';
 import { TokenTypeEnum } from '../models/entities/token.entity';
+import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -20,14 +21,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: process.env.JWTKEY,
-    } as StrategyOptionsWithoutRequest);
+      passReqToCallback: true,
+    } as StrategyOptionsWithRequest);
   }
 
-  async validate(payload: UserPayloadDto) {
+  async validate(request: Request, payload: UserPayloadDto) {
     // Extract the token from the request
-    const token = ExtractJwt.fromAuthHeaderAsBearerToken()({
-      headers: { authorization: `Bearer ${payload.token}` },
-    } as any);
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
 
     if (!token) {
       throw new UnauthorizedException('Token not found');

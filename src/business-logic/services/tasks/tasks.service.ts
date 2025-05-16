@@ -11,8 +11,12 @@ import {
   TASKS_REPOSITORY,
 } from '../../../core/constants';
 import { Task } from '../../../core/models/entities/task.entity';
-import { SearchQuery } from '../../../core/models/queries/searchQuery';
+import {
+  SearchQuery,
+  SearchType,
+} from '../../../core/models/queries/searchQuery';
 import { TaskSearchExtension } from '../../../core/utils/taskSearchExtension';
+import { SearchResult } from '../../../core/utils/SearchExtension';
 import { TaskCreateDto } from '../../../core/models/dto/tasks/taskCreate.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { RanksService } from '../ranks/ranks.service';
@@ -49,16 +53,16 @@ export class TasksService {
     return task_models;
   }
 
-  async searchTasks(query: SearchQuery): Promise<TaskDto[]> {
+  async searchTasks(query: SearchQuery): Promise<SearchResult<TaskDto>> {
     // Set default values if not provided
     if (!query.search_string) {
       query.search_string = '';
     }
-    if (!query.rank_filter) {
-      query.rank_filter = [];
+    if (query.rank_filter === undefined) {
+      query.rank_filter = null;
     }
-    if (!query.language_filter) {
-      query.language_filter = [];
+    if (query.language_filter === undefined) {
+      query.language_filter = null;
     }
     if (!query.page || query.page < 1) {
       query.page = 1;
@@ -66,6 +70,7 @@ export class TasksService {
     if (!query.limit || query.limit < 1) {
       query.limit = 10;
     }
+    // Default sort values are set in the SearchQuery model
 
     // Get all tasks with their relationships
     const allTasks = await this.tasksRepository.findAll({
@@ -74,17 +79,25 @@ export class TasksService {
       },
     });
 
-    // Apply filtering, searching, and pagination
-    const search_result = new TaskSearchExtension(allTasks, query)
+    // Apply filtering, searching, sorting, and pagination
+    const searchExtension = new TaskSearchExtension(allTasks, query)
       .filter()
       .search()
+      .sort()
       .paginate();
 
     // Convert to DTOs
-    const tasks = search_result.db_result;
+    const tasks = searchExtension.db_result;
     const task_models = tasks.map((task) => new TaskDto(task));
 
-    return task_models;
+    // Return the search result with hasMore flag
+    return {
+      items: task_models,
+      total: allTasks.length,
+      page: query.page,
+      limit: query.limit,
+      hasMore: searchExtension.hasMore,
+    };
   }
 
   async createTask(

@@ -48,17 +48,22 @@ export class AuthService {
     }
 
     const tokens = await this.tokensService.createTokens(userEntity);
-    return { 
-      user, 
+    return {
+      user,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      expiresIn: tokens.expiresIn
+      expiresIn: tokens.expiresIn,
     };
   }
 
   public async create(
     user: UserCreateDto,
-  ): Promise<{ user: UserDto; accessToken: string; refreshToken: string; expiresIn: number }> {
+  ): Promise<{
+    user: UserDto;
+    accessToken: string;
+    refreshToken: string;
+    expiresIn: number;
+  }> {
     const userExist = await this.userService.findOneByUsername(user.username);
     if (userExist) {
       throw new ForbiddenException('This username already exist');
@@ -79,11 +84,11 @@ export class AuthService {
     // Create a proper UserDto instance
     const userDto = new UserDto(newUser);
 
-    return { 
-      user: userDto, 
+    return {
+      user: userDto,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      expiresIn: tokens.expiresIn
+      expiresIn: tokens.expiresIn,
     };
   }
 
@@ -100,7 +105,6 @@ export class AuthService {
   public async logout(refreshToken: string): Promise<boolean> {
     return this.tokensService.revokeToken(refreshToken);
   }
-
 
   private async hashPassword(password: string) {
     const hash = await bcrypt.hash(password, 10);
