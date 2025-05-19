@@ -11,7 +11,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthRequest } from '../../../core/models/dto/users/userPayload.dto';
 import { UsersService } from '../../../business-logic/services/users/users.service';
 import { UserClientModel } from '../../../core/models/viewModels/users/userClient.model';
 import { Roles } from '../../../core/guards/roles/role.decorator';
@@ -20,6 +19,8 @@ import { User, UserRoleEnum } from '../../../core/models/entities/user.entity';
 import { UserCreateDto } from '../../../core/models/dto/users/userCreate.dto';
 import { UserUpdateDto } from '../../../core/models/dto/users/userUpdate.dto';
 import { UserStatsDto } from '../../../core/models/dto/users/UserStatsDto';
+import { UserPayloadDto } from '../../../core/models/dto/users/userPayload.dto';
+import { AuthRequest } from '../../../core/models/types/authRequest';
 
 @Controller('users')
 export class UsersController {
@@ -76,7 +77,7 @@ export class UsersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Delete()
+  @Delete('remove')
   async deleteCurrentUser(@Req() req: AuthRequest): Promise<void> {
     const user: User | null = await this.usersService.findOneByToken(
       req.user.token,
@@ -86,6 +87,19 @@ export class UsersController {
     }
 
     await this.usersService.delete(req.user.token);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete()
+  async disableCurrentUser(@Req() req: AuthRequest): Promise<void> {
+    const user: User | null = await this.usersService.findOneByToken(
+      req.user.token,
+    );
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+
+    await this.usersService.disable(req.user.token);
   }
 
   @Roles(UserRoleEnum.ADMIN)

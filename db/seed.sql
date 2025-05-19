@@ -1,19 +1,19 @@
 -- Ranks
 
 INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "createdAt", "updatedAt")
-VALUES (0, gen_random_uuid(), 'Þræll', 0, 100, 2000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (1, gen_random_uuid(), 'Þræll', 0, 100, 2000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "createdAt", "updatedAt")
-VALUES (1, gen_random_uuid(), 'Ceorl', 1, 200, 4000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (2, gen_random_uuid(), 'Ceorl', 1, 200, 4000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "createdAt", "updatedAt")
-VALUES (2, gen_random_uuid(), 'Eorl', 2, 400, 8000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (3, gen_random_uuid(), 'Eorl', 2, 400, 8000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "createdAt", "updatedAt")
-VALUES (3, gen_random_uuid(), 'Einheri', 3, 600, 16000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (4, gen_random_uuid(), 'Einheri', 3, 600, 16000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "createdAt", "updatedAt")
-VALUES (4, gen_random_uuid(), 'Valkyrie', 4, 1000, 32000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (5, gen_random_uuid(), 'Valkyrie', 4, 1000, 32000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "createdAt", "updatedAt")
-VALUES (5, gen_random_uuid(), 'Champion of Odin', 5, 1600, 64000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (6, gen_random_uuid(), 'Champion of Odin', 5, 1600, 64000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 INSERT INTO public."Ranks" (id, token, name, number, value, "targetValue", "createdAt", "updatedAt")
-VALUES (6, gen_random_uuid(), 'Champion of Frey', 5, 1600, 64000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES (7, gen_random_uuid(), 'Champion of Frey', 5, 1600, 64000, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Statuses
 --
@@ -22,9 +22,9 @@ INSERT INTO public."UserStatuses" (id, name, "createdAt", "updatedAt") VALUES (1
 
 -- Lanugages
 
-INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (0, gen_random_uuid(), 'C', 'C', 'main.c', 'clang', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (1, gen_random_uuid(), 'Cpp', 'Cpp', 'main.cpp', 'clang', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (2, gen_random_uuid(), 'Python', 'Py', 'main.py', 'python', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (3, gen_random_uuid(), 'JavaScript', 'JS', 'main.js', 'javascript', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (4, gen_random_uuid(), 'TypeScript', 'TS', 'main.ts', 'typescript', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (5, gen_random_uuid(), 'Rust', 'Rs', 'main.rs', 'rust', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (1, gen_random_uuid(), 'C', 'C', 'main.c', 'clang', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (2, gen_random_uuid(), 'Cpp', 'Cpp', 'main.cpp', 'clang', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (3, gen_random_uuid(), 'Python', 'Py', 'main.py', 'python', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (4, gen_random_uuid(), 'JavaScript', 'JS', 'main.js', 'javascript', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (5, gen_random_uuid(), 'TypeScript', 'TS', 'main.ts', 'typescript', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO public."Languages" (id, token, name, "shortName", "mainFile", image, "createdAt", "updatedAt") VALUES (6, gen_random_uuid(), 'Rust', 'Rs', 'main.rs', 'rust', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

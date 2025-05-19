@@ -30,4 +30,18 @@ export class LanguagesService {
 
     return language;
   }
+
+  async getLanguageById(language_id: string) {
+    const language = await this.languagesRepository.findOne({
+      where: {
+        id: language_id,
+      },
+    });
+
+    if (!language) {
+      throw new NotFoundException('Language not found');
+    }
+
+    return language;
+  }
 }

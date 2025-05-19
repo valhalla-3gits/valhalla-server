@@ -6,7 +6,7 @@ export class TaskUpdateDto {
   readonly name: string;
 
   @IsNotEmpty()
-  readonly rank_uuid: string;
+  readonly rank_id: string;
 
   @IsNotEmpty()
   readonly tests: TestUpdateDto[];
@@ -18,7 +18,7 @@ export class TaskUpdateDto {
   readonly output_examples: string;
 
   @IsNotEmpty()
-  readonly language_uuid: string;
+  readonly language_id: string;
 
   @IsNotEmpty()
   readonly prototype: string;

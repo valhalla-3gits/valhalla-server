@@ -9,11 +9,13 @@ async function bootstrap() {
   // global endpoints prefix
   app.setGlobalPrefix('api/v1');
   // handle all user input validation globally
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    forbidNonWhitelisted: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
   const config = new DocumentBuilder()
     .setTitle('Valhalla API')
     .setDescription('The Valhalla API description')

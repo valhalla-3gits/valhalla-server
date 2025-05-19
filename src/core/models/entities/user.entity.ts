@@ -90,7 +90,7 @@ export class User extends Model<User> {
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
-    defaultValue: 0,
+    defaultValue: 1,
   })
   declare rankId: number;
 

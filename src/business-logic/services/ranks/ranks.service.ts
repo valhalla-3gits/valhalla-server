@@ -8,6 +8,20 @@ export class RanksService {
     @Inject(RANKS_REPOSITORY) private readonly ranksRepository: typeof Rank,
   ) {}
 
+  async getRankById(rank_id: string) {
+    const rank = await this.ranksRepository.findOne({
+      where: {
+        id: rank_id,
+      },
+    });
+
+    if (!rank) {
+      throw new NotFoundException('Rank not found');
+    }
+
+    return rank;
+  }
+
   async getRanks(): Promise<Rank[] | null> {
     let ranks = await this.ranksRepository.findAll<Rank>();
     if (ranks.length === 0) {

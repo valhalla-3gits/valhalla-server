@@ -2,6 +2,7 @@ import { Rank } from '../../entities/rank.entity';
 
 export class RankDto {
   constructor(rank: Rank) {
+    this.id = rank.id;
     this.token = rank.token;
     this.name = rank.name;
     this.number = rank.number;
@@ -9,6 +10,7 @@ export class RankDto {
     this.targetValue = rank.targetValue;
   }
 
+  readonly id: number;
   readonly token: string;
   readonly name: string;
   readonly number: number;

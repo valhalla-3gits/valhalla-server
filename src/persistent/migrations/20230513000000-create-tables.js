@@ -156,7 +156,7 @@ module.exports = {
       rankId: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 1,
         references: {
           model: 'Ranks',
           key: 'id',
@@ -273,7 +273,7 @@ module.exports = {
       task_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 1,
         references: {
           model: 'Tasks',
           key: 'id',

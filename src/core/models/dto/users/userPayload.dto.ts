@@ -1,4 +1,3 @@
-import { Request as HttpRequest } from 'express';
 import { User, UserRoleEnum } from '../../entities/user.entity';
 
 export class UserPayloadDto {
@@ -14,5 +13,3 @@ export class UserPayloadDto {
   readonly status: string;
   readonly role: UserRoleEnum;
 }
-
-export type AuthRequest = HttpRequest & { user: UserPayloadDto };

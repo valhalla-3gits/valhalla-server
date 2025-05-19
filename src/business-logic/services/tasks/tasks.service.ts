@@ -11,10 +11,7 @@ import {
   TASKS_REPOSITORY,
 } from '../../../core/constants';
 import { Task } from '../../../core/models/entities/task.entity';
-import {
-  SearchQuery,
-  SearchType,
-} from '../../../core/models/queries/searchQuery';
+import { SearchQuery } from '../../../core/models/queries/searchQuery';
 import { TaskSearchExtension } from '../../../core/utils/taskSearchExtension';
 import { SearchResult } from '../../../core/utils/SearchExtension';
 import { TaskCreateDto } from '../../../core/models/dto/tasks/taskCreate.dto';
@@ -22,7 +19,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { RanksService } from '../ranks/ranks.service';
 import { LanguagesService } from '../languages/languages.service';
 import { TestsService } from '../tests/tests.service';
-import { Test } from '@nestjs/testing';
 import { TaskDto } from '../../../core/models/dto/tasks/task.dto';
 import { TaskUpdateDto } from '../../../core/models/dto/tasks/taskUpdate.dto';
 import { TaskAnswerDto } from '../../../core/models/dto/tasks/taskAnswer.dto';
@@ -31,6 +27,7 @@ import { SolvedTask } from '../../../core/models/entities/solvedTask.entity';
 import { FavouriteTask } from '../../../core/models/entities/favouriteTask.entity';
 import { User } from 'src/core/models/entities/user.entity';
 import { UsersService } from '../users/users.service';
+import { Test } from 'src/core/models/entities/tests.entity';
 
 @Injectable()
 export class TasksService {
@@ -100,13 +97,107 @@ export class TasksService {
     };
   }
 
+  async searchFavouriteTasks(
+    query: SearchQuery,
+    id: number,
+  ): Promise<SearchResult<TaskDto>> {
+    // Set default values if not provided
+    if (!query.search_string) {
+      query.search_string = '';
+    }
+    if (query.rank_filter === undefined) {
+      query.rank_filter = null;
+    }
+    if (query.language_filter === undefined) {
+      query.language_filter = null;
+    }
+    if (!query.page || query.page < 1) {
+      query.page = 1;
+    }
+    if (!query.limit || query.limit < 1) {
+      query.limit = 10;
+    }
+    // Default sort values are set in the SearchQuery model
+
+    const user = await this.usersService.findOneById(id);
+
+    // Get all tasks with their relationships
+    const allTasks = user?.favouriteTasks || [];
+
+    // Apply filtering, searching, sorting, and pagination
+    const searchExtension = new TaskSearchExtension(allTasks, query)
+      .filter()
+      .search()
+      .sort()
+      .paginate();
+
+    // Convert to DTOs
+    const tasks = searchExtension.db_result;
+    const task_models = tasks.map((task) => new TaskDto(task));
+
+    // Return the search result with hasMore flag
+    return {
+      items: task_models,
+      total: allTasks.length,
+      page: query.page,
+      limit: query.limit,
+      hasMore: searchExtension.hasMore,
+    };
+  }
+
+  async searchSolvedTasks(query: SearchQuery, id: number) {
+    // Set default values if not provided
+    if (!query.search_string) {
+      query.search_string = '';
+    }
+    if (query.rank_filter === undefined) {
+      query.rank_filter = null;
+    }
+    if (query.language_filter === undefined) {
+      query.language_filter = null;
+    }
+    if (!query.page || query.page < 1) {
+      query.page = 1;
+    }
+    if (!query.limit || query.limit < 1) {
+      query.limit = 10;
+    }
+    // Default sort values are set in the SearchQuery model
+
+    const user = await this.usersService.findOneByIdWithSolvedTasks(id);
+
+    // Get all tasks with their relationships
+    const allTasks =
+      user?.solvedTasks?.map((solvedTasks) => solvedTasks.task) || [];
+
+    // Apply filtering, searching, sorting, and pagination
+    const searchExtension = new TaskSearchExtension(allTasks, query)
+      .filter()
+      .search()
+      .sort()
+      .paginate();
+
+    // Convert to DTOs
+    const tasks = searchExtension.db_result;
+    const task_models = tasks.map((task) => new TaskDto(task));
+
+    // Return the search result with hasMore flag
+    return {
+      items: task_models,
+      total: allTasks.length,
+      page: query.page,
+      limit: query.limit,
+      hasMore: searchExtension.hasMore,
+    };
+  }
+
   async createTask(
     createModel: TaskCreateDto,
     author_id: number,
   ): Promise<TaskDto> {
-    const rank = await this.ranksService.getRankByToken(createModel.rank_uuid);
-    const language = await this.languagesService.getLanguageByToken(
-      createModel.language_uuid,
+    const rank = await this.ranksService.getRankById(createModel.rank_id);
+    const language = await this.languagesService.getLanguageById(
+      createModel.language_id,
     );
 
     let task: Task | null = await this.tasksRepository.create<Task>(
@@ -191,9 +282,9 @@ export class TasksService {
     }
 
     // Get the rank and language by their tokens
-    const rank = await this.ranksService.getRankByToken(updateModel.rank_uuid);
-    const language = await this.languagesService.getLanguageByToken(
-      updateModel.language_uuid,
+    const rank = await this.ranksService.getRankById(updateModel.rank_id);
+    const language = await this.languagesService.getLanguageById(
+      updateModel.language_id,
     );
 
     // Update the task
@@ -355,5 +446,18 @@ export class TasksService {
     }
 
     return solvedTask;
+  }
+
+  async getTasksByUser(id: number) {
+    const tasks = await this.tasksRepository.findAll({
+      where: {
+        authorId: id,
+      },
+      include: {
+        all: true,
+      },
+    });
+
+    return tasks;
   }
 }

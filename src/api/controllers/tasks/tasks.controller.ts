@@ -21,7 +21,7 @@ import {
 } from '../../../core/models/queries/searchQuery';
 import { SearchResult } from '../../../core/utils/SearchExtension';
 import { TaskCreateDto } from '../../../core/models/dto/tasks/taskCreate.dto';
-import { AuthRequest } from '../../../core/models/dto/users/userPayload.dto';
+import { AuthRequest } from '../../../core/models/types/authRequest';
 import { UsersService } from '../../../business-logic/services/users/users.service';
 import { TaskDto } from '../../../core/models/dto/tasks/task.dto';
 import { TaskUpdateDto } from '../../../core/models/dto/tasks/taskUpdate.dto';
@@ -38,20 +38,6 @@ export class TasksController {
     private readonly usersService: UsersService,
   ) {}
 
-  /**
-   * Search for tasks with optional filtering, fuzzy search, sorting, and pagination
-   *
-   * @param query SearchQuery object containing:
-   *   - search_string: String to search for in task names (fuzzy search)
-   *   - rank_filter: ID of the rank to filter by
-   *   - language_filter: ID of the language to filter by
-   *   - search_type: Type of search ('all', 'favorites', 'solved')
-   *   - sort_by: Field to sort by ('createdAt' or 'name')
-   *   - sort_direction: Direction to sort ('asc' or 'desc')
-   *   - page: Page number (starts at 1)
-   *   - limit: Number of items per page
-   * @param req Request object containing user information
-   */
   @UseGuards(AuthGuard('jwt'))
   @Get()
   async searchTasks(
@@ -116,6 +102,46 @@ export class TasksController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('favourites')
+  async searchFavouriteTasks(
+    @Query() query: SearchQuery,
+    @Req() req: AuthRequest,
+  ): Promise<SearchResult<TaskDto>> {
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
+    // Get all tasks and filter for favorites
+    const searchResult = await this.tasksService.searchFavouriteTasks(
+      query,
+      user.id,
+    );
+
+    return searchResult;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('solved')
+  async searchSolvedTasks(
+    @Query() query: SearchQuery,
+    @Req() req: AuthRequest,
+  ): Promise<SearchResult<TaskDto>> {
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
+    // Get all tasks and filter for favorites
+    const searchResult = await this.tasksService.searchSolvedTasks(
+      query,
+      user.id,
+    );
+
+    return searchResult;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async addTask(
     @Body() createModel: TaskCreateDto,
@@ -129,6 +155,25 @@ export class TasksController {
     const task = await this.tasksService.createTask(createModel, user.id);
 
     return task;
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('user-tasks')
+  async getUserTasks(@Req() req: AuthRequest): Promise<TaskDto[]> {
+    const user = await this.usersService.findOneByToken(req.user.token);
+    if (!user) {
+      throw new NotFoundException('User does not exist');
+    }
+
+    const tasks: Task[] = await this.tasksService.getTasksByUser(user.id);
+
+    const task_models = tasks.map((task) => {
+      const task_model = new TaskDto(task);
+
+      return task_model;
+    });
+
+    return task_models;
   }
 
   @UseGuards(AuthGuard('jwt'))

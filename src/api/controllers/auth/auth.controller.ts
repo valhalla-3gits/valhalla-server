@@ -11,10 +11,8 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../../../business-logic/services/auth/auth.service';
 import { UserCreateDto } from '../../../core/models/dto/users/userCreate.dto';
-import {
-  AuthRequest,
-  UserPayloadDto,
-} from '../../../core/models/dto/users/userPayload.dto';
+import { UserPayloadDto } from '../../../core/models/dto/users/userPayload.dto';
+import { AuthRequest } from '../../../core/models/types/authRequest';
 import { UserDto } from '../../../core/models/dto/users/user.dto';
 
 @Controller('auth')

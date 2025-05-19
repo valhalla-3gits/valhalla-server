@@ -8,6 +8,8 @@ import { UserUpdateDto } from '../../../core/models/dto/users/userUpdate.dto';
 import { Rank } from '../../../core/models/entities/rank.entity';
 import { Op } from 'sequelize';
 import { UserStatsDto } from '../../../core/models/dto/users/UserStatsDto';
+import { SolvedTask } from '../../../core/models/entities/solvedTask.entity';
+import { Task } from '../../../core/models/entities/task.entity';
 
 @Injectable()
 export class UsersService {
@@ -89,6 +91,20 @@ export class UsersService {
     });
   }
 
+  async findOneByIdWithSolvedTasks(id: number): Promise<User | null> {
+    return await this.userRepository.findOne<User>({
+      where: { id },
+      include: {
+        model: SolvedTask,
+        include: [
+          {
+            model: Task,
+          },
+        ],
+      },
+    });
+  }
+
   async promoteRank(user: User) {
     const ranks = await this.ranksRepository.findAll({
       where: {
@@ -115,10 +131,21 @@ export class UsersService {
     const userStats = {
       tasksCompleted: user.solvedTasks?.length ?? 0,
       currentXp: user.experience,
-      xpToNextRank: user.rank.targetValue - user.experience,
+      xpToNextRank: user.rank.targetValue,
       nextRank: nextRank?.name ?? 'N/A',
     } as UserStatsDto;
 
     return userStats;
+  }
+
+  async disable(token: string) {
+    await this.userRepository.update<User>(
+      { statusId: 1 },
+      {
+        where: {
+          token: token,
+        },
+      },
+    );
   }
 }
